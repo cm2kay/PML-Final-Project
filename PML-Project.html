@@ -177,28 +177,27 @@ training &lt;-  training_full[inTrain,]</code></pre>
 <h2>Random forest</h2>
 <p>Now, the data is ready for machine learning. I decided to use the random forest method, because random forest is in general a high performing algorithm and because some other data scientists used it in the past for Human Activity Recognition achieving good results (i.e Gjoreski et al.(2011)).</p>
 <pre class="r"><code>modelFit &lt;- train(training$classe~.,data=training ,method=&quot;rf&quot;,prox=TRUE)</code></pre>
-<pre><code>## Loading required package: randomForest</code></pre>
-<pre><code>## Warning: package 'randomForest' was built under R version 3.1.2</code></pre>
-<pre><code>## randomForest 4.6-10
+<pre><code>## Loading required package: randomForest
+## randomForest 4.6-10
 ## Type rfNews() to see new features/changes/bug fixes.</code></pre>
 <pre class="r"><code>print(modelFit)</code></pre>
 <pre><code>## Random Forest 
 ## 
-## 1572 samples
+## 4712 samples
 ##   53 predictor
 ##    5 classes: 'A', 'B', 'C', 'D', 'E' 
 ## 
 ## No pre-processing
 ## Resampling: Bootstrapped (25 reps) 
 ## 
-## Summary of sample sizes: 1572, 1572, 1572, 1572, 1572, 1572, ... 
+## Summary of sample sizes: 4712, 4712, 4712, 4712, 4712, 4712, ... 
 ## 
 ## Resampling results across tuning parameters:
 ## 
-##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD  
-##    2    0.9219643  0.9012952  0.01169797   0.01466625
-##   27    0.9354486  0.9183247  0.01187964   0.01495960
-##   53    0.9272271  0.9079254  0.01365626   0.01722048
+##   mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   
+##    2    0.9740175  0.9671337  0.005115568  0.006464462
+##   27    0.9821241  0.9773932  0.005524251  0.006981251
+##   53    0.9780833  0.9722804  0.006201777  0.007840885
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 27.</code></pre>
@@ -210,55 +209,52 @@ training &lt;-  training_full[inTrain,]</code></pre>
 ##                      Number of trees: 500
 ## No. of variables tried at each split: 27
 ## 
-##         OOB estimate of  error rate: 4.33%
+##         OOB estimate of  error rate: 1.15%
 ## Confusion matrix:
-##     A   B   C   D   E class.error
-## A 444   2   1   0   0 0.006711409
-## B  14 274  15   1   0 0.098684211
-## C   0   8 261   5   0 0.047445255
-## D   1   0  13 244   0 0.054263566
-## E   0   5   0   3 281 0.027681661</code></pre>
+##      A   B   C   D   E class.error
+## A 1338   2   0   0   0 0.001492537
+## B    8 896   8   0   0 0.017543860
+## C    0   9 810   3   0 0.014598540
+## D    0   0  12 760   0 0.015544041
+## E    0   5   0   7 854 0.013856813</code></pre>
 <p>We achieved an accuray of more than 0.90% and an estimate of error rate of less than 0.05%. Thats a quite good result! Maybe we could achieve even more accuracy by using the whole training data set. But I will stay frugal.</p>
 </div>
 <div id="testing-the-model" class="section level2">
 <h2>Testing the model</h2>
 <p>Now, we will test the model with the test data.</p>
-<pre class="r"><code>testingPC &lt;- predict(modelFit, testing[-(which(names(tr) == &quot;classe&quot;))])</code></pre>
-<pre><code>## Loading required package: randomForest
-## randomForest 4.6-10
-## Type rfNews() to see new features/changes/bug fixes.</code></pre>
-<pre class="r"><code>confusionMatrix(testing$classe , testingPC)</code></pre>
+<pre class="r"><code>testingPC &lt;- predict(modelFit, testing[-(which(names(tr) == &quot;classe&quot;))])
+confusionMatrix(testing$classe , testingPC)</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1114    0    0    2    0
-##          B   35  704   17    2    1
-##          C    0   27  653    4    0
-##          D    3    0   15  625    0
-##          E    2    7    1   10  701
+##          A 1116    0    0    0    0
+##          B    7  749    3    0    0
+##          C    0    9  675    0    0
+##          D    1    0    4  637    1
+##          E    0    4    1    2  714
 ## 
 ## Overall Statistics
 ##                                           
-##                Accuracy : 0.9679          
-##                  95% CI : (0.9619, 0.9732)
-##     No Information Rate : 0.2942          
+##                Accuracy : 0.9918          
+##                  95% CI : (0.9885, 0.9944)
+##     No Information Rate : 0.2865          
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
 ##                                           
-##                   Kappa : 0.9593          
+##                   Kappa : 0.9897          
 ##  Mcnemar's Test P-Value : NA              
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9653   0.9539   0.9519   0.9720   0.9986
-## Specificity            0.9993   0.9827   0.9904   0.9945   0.9938
-## Pos Pred Value         0.9982   0.9275   0.9547   0.9720   0.9723
-## Neg Pred Value         0.9857   0.9893   0.9898   0.9945   0.9997
-## Prevalence             0.2942   0.1881   0.1749   0.1639   0.1789
-## Detection Rate         0.2840   0.1795   0.1665   0.1593   0.1787
+## Sensitivity            0.9929   0.9829   0.9883   0.9969   0.9986
+## Specificity            1.0000   0.9968   0.9972   0.9982   0.9978
+## Pos Pred Value         1.0000   0.9868   0.9868   0.9907   0.9903
+## Neg Pred Value         0.9971   0.9959   0.9975   0.9994   0.9997
+## Prevalence             0.2865   0.1942   0.1741   0.1629   0.1823
+## Detection Rate         0.2845   0.1909   0.1721   0.1624   0.1820
 ## Detection Prevalence   0.2845   0.1935   0.1744   0.1639   0.1838
-## Balanced Accuracy      0.9823   0.9683   0.9712   0.9833   0.9962</code></pre>
+## Balanced Accuracy      0.9964   0.9899   0.9928   0.9975   0.9982</code></pre>
 </div>
 <div id="preparing-submissions" class="section level2">
 <h2>Preparing submissions</h2>

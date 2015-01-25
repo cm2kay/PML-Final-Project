@@ -16,7 +16,7 @@ The next lines will prepare the data: Firstly, it will clear up missing values. 
 
 ```{r, warning=FALSE}
 
-tr <- read.csv("pml-training.csv")
+tr <- read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
 prepare <- function(t) {
   t[t == ""] <- NA
   t[t == "#DIV/0!"] <- NA
@@ -69,7 +69,7 @@ confusionMatrix(testing$classe , testingPC)
 In the following I prepare the submissions and the text file output.
 
 ```{r, warning=FALSE}
-test <- read.csv("pml-testing.csv")
+test <- read.csv(url("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
 test <-  test[which(names(test) %in% names(training))]
 answers <- predict(modelFit,newdata=test)
 
