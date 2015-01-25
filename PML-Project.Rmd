@@ -1,0 +1,86 @@
+---
+title: "PML Course Project"
+author: "Christian Müller"
+date: "Saturday, January 24, 2015"
+output: html_document
+---
+# Practical Machine Learning: Final Project
+```{r, warning=FALSE}
+library(caret) #Loading caret
+set.seed(1234) #Setting seed for reproductability
+```
+
+## Data preparation 
+
+The next lines will prepare the data: Firstly, it will clear up missing values. Secondly, variables with variance near zero or with A LOT OF missing values will be removed. Thirdly, we will delete time information. 
+
+```{r, warning=FALSE}
+
+tr <- read.csv("pml-training.csv")
+prepare <- function(t) {
+  t[t == ""] <- NA
+  t[t == "#DIV/0!"] <- NA
+  t <- t[-nearZeroVar(t)]
+  t <- (t[,colSums(is.na(t)) < 1000 ])
+  t <- t[-(which(names(t) %in% c("X","user_name","raw_timestamp_part_1","raw_timestamp_part_2","cvtd_timestamp")))]
+  t
+}
+
+tr <- prepare(tr)
+head(tr)
+```
+
+## Splitting the data
+Next step is splitting the data into my own training and testing set. Because of practicability and speed, I will use only 10 percent of the training set for machine learning. 
+
+```{r, warning=FALSE}
+inTrain_full <- createDataPartition(y=tr$classe, p=0.8, list=FALSE)
+training_full <- tr[inTrain_full,]
+testing <- tr[-inTrain_full,]
+inTrain <- createDataPartition(y=training_full$classe,p=0.3, list=FALSE)
+training <-  training_full[inTrain,]
+
+```
+
+## Random forest
+
+Now, the data is ready for machine learning. I decided to use the random forest method, because random forest is in general a high performing algorithm and because some other data scientists used it in the past for Human Activity Recognition achieving good results (i.e Gjoreski et al.(2011)).
+
+```{r, cache=FALSE, warning=FALSE}
+modelFit <- train(training$classe~.,data=training ,method="rf",prox=TRUE)
+
+print(modelFit)
+print(modelFit$finalModel)
+```
+
+We achieved an accuray of more than 0.90% and an estimate of error rate of less than 0.05%. Thats a quite good result! Maybe we could achieve even more accuracy by using the whole training data set. But I will stay frugal. 
+
+## Testing the model
+
+Now, we will test the model with the test data.
+
+```{r, warning=FALSE}
+testingPC <- predict(modelFit, testing[-(which(names(tr) == "classe"))])
+confusionMatrix(testing$classe , testingPC)
+```
+
+## Preparing submissions
+
+In the following I prepare the submissions and the text file output.
+
+```{r, warning=FALSE}
+test <- read.csv("pml-testing.csv")
+test <-  test[which(names(test) %in% names(training))]
+answers <- predict(modelFit,newdata=test)
+
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+pml_write_files(answers)
+
+```
